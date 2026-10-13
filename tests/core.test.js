@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {emailsFrom,validEmail,basicDraft,validateAI,DEFAULT_PROFILE,risksFor} from '../extension/core.js';
+test('Extract only literal email evidence, including OCR line wrapping',()=>{assert.deepEqual(emailsFrom('投递 recruiter\\@example.com；另一个 jobs@\nexample.org'),['recruiter@example.com','jobs@example.org']);assert.deepEqual(emailsFrom('a@foo.com a@foo.com'),['a@foo.com']);assert.equal(validEmail('a@foo.com\nb@foo.com'),false);});
+test('Multiple recipients require explicit selection',()=>{const d=basicDraft('分别联系 a@foo.com b@foo.com',DEFAULT_PROFILE);assert.equal(d.to,'');assert.ok(d.warnings.some(x=>x.includes('多个')));});
+test('External text cannot override the recipient via AI output',()=>{const d=validateAI({to:'attacker@bad.com',subject:'申请',body:'正文',warnings:[]},'投递a@company.com',DEFAULT_PROFILE);assert.equal(d.to,'a@company.com');assert.throws(()=>validateAI({subject:'申请'},'',DEFAULT_PROFILE));});
+test('Uses editable availability instead of fixed promises',()=>{const d=basicDraft('mail@example.com',{...DEFAULT_PROFILE,days:'4',months:'3',startDate:'2027-01-02'});assert.match(d.subject,/1月2日/);assert.match(d.body,/每周稳定出勤4天，可持续实习3个月/);assert.ok(!risksFor('公众号运营',DEFAULT_PROFILE).some(x=>x.includes('暂无公众号')));});

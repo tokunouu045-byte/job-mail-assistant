@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "求职邮件助手 · 开源版",
+  "version": "2.0.0",
+  "description": "读取招聘页面或本地识别截图，按个人资料生成草稿，在 QQ 邮箱中审核后手动发送。",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "sidePanel",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://mail.qq.com/*",
+    "https://*.xiaohongshu.com/*",
+    "https://xhslink.cn/*",
+    "https://xhslink.com/*",
+    "https://*.mail.qq.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://api.deepseek.com/*",
+    "https://*.xhscdn.com/*",
+    "https://api.openai.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "读取这条招聘，准备求职邮件",
+    "default_icon": "assets/icon.png"
+  },
+  "icons": {
+    "128": "assets/icon.png"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.qq.com/*",
+        "https://*.mail.qq.com/*"
+      ],
+      "js": [
+        "qq-compose.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self'; connect-src 'self' https://api.openai.com https://api.deepseek.com https://*.xhscdn.com;"
+  }
+}
